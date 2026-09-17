@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/event/:path*", "destination": "/index.html" }
+  ]
+}
