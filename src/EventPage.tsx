@@ -148,7 +148,7 @@ export default function EventPage() {
     );
   }
 
-  const joined = event.participants.length;
+  const joined = Math.max(0, Number(event.joinedCount || 0));
 
   return (
     <main className="shell">
