@@ -6,6 +6,7 @@ import HomePage from './HomePage';
 const TvPage = lazy(() => import('./TvPage'));
 const SandboxPhone = import.meta.env.DEV ? lazy(() => import('./sandbox/SandboxPhone')) : null;
 const SandboxTv = import.meta.env.DEV ? lazy(() => import('./sandbox/SandboxTv')) : null;
+const SandboxControl = import.meta.env.DEV ? lazy(() => import('./sandbox/SandboxControl')) : null;
 
 function TvFallback() {
   return <div style={{ position: 'fixed', inset: 0, background: '#141416' }} />;
@@ -25,8 +26,16 @@ export default function App() {
             </Suspense>
           }
         />
-        {import.meta.env.DEV && SandboxPhone && SandboxTv ? (
+        {import.meta.env.DEV && SandboxPhone && SandboxTv && SandboxControl ? (
           <>
+            <Route
+              path="/sandbox/control"
+              element={
+                <Suspense fallback={null}>
+                  <SandboxControl />
+                </Suspense>
+              }
+            />
             <Route
               path="/sandbox/americano/tv"
               element={

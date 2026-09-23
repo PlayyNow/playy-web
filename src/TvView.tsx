@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { PublicAmericano, PublicEvent, PublicEventResponse, PublicMatch, PublicRound, PublicStanding } from './types';
 import { avatarSrc, courtLabel, formatNet, initials, playerName } from './names';
+import { avatarCircleColor } from './avatarTone';
 import './tv.css';
 
 const FINAL_QR_URL = 'https://joinplayy.com';
@@ -52,11 +53,12 @@ function Logo() {
 
 function TvAvatar({ avatarId, name, size }: { avatarId?: string | null; name: string; size: number }) {
   const src = avatarSrc(avatarId);
+  const background = avatarCircleColor(avatarId);
   if (src) {
-    return <img className="tv-avatar" src={src} alt="" width={size} height={size} style={{ width: size, height: size }} />;
+    return <img className="tv-avatar" src={src} alt="" width={size} height={size} style={{ width: size, height: size, background }} />;
   }
   return (
-    <span className="tv-avatar fallback" style={{ width: size, height: size, fontSize: Math.max(12, Math.round(size * 0.32)) }}>
+    <span className="tv-avatar fallback" style={{ width: size, height: size, fontSize: Math.max(12, Math.round(size * 0.32)), background }}>
       {initials(name)}
     </span>
   );
