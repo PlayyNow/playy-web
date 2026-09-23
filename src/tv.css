@@ -141,9 +141,12 @@
 
 .tv-root .tv-segments {
   width: 520px;
+  max-width: 520px;
+  flex: 0 0 520px;
   display: flex;
   gap: 4px;
   align-items: center;
+  overflow: hidden;
 }
 
 .tv-root .tv-segment {
@@ -442,6 +445,10 @@
   grid-template-columns: 1fr 1fr 1fr;
 }
 
+.tv-root .tv-courts.quad {
+  grid-template-rows: 1fr 1fr;
+}
+
 .tv-root .tv-court {
   min-width: 0;
   min-height: 0;
@@ -456,6 +463,24 @@
 
 .tv-root .tv-court.live-border {
   border-color: rgba(0, 255, 133, 0.35);
+}
+
+.tv-root .tv-sit-card {
+  border-color: #3a3a3e;
+}
+
+.tv-root .tv-sit-label {
+  color: #fd83a3;
+}
+
+.tv-root .tv-sit-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .tv-root .tv-court-top {
@@ -532,6 +557,10 @@
 .tv-root .tv-upnext-main {
   flex: 1;
   min-width: 0;
+}
+
+.tv-root .tv-upnext .tv-sit {
+  margin-top: 8px;
 }
 
 .tv-root .tv-upnext-kicker {

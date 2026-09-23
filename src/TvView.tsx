@@ -365,6 +365,36 @@ function SetupState({
   );
 }
 
+function SitOutCard({
+  userIds,
+  event,
+  standings,
+}: {
+  userIds: string[];
+  event: PublicEvent;
+  standings: PublicStanding[];
+}) {
+  const people = userIds.slice(0, 4);
+  return (
+    <article className="tv-court tv-sit-card">
+      <h3 className="tv-court-name tv-sit-label">Sitting out</h3>
+      <div className="tv-sit-list">
+        {people.map((userId) => {
+          const name = displayName(userId, event, standings);
+          const avatarId = event.participants.find((player) => player.userId === userId)?.avatarId
+            ?? standings.find((row) => row.userId === userId)?.user.avatarId;
+          return (
+            <div key={userId} className="tv-person">
+              <TvAvatar avatarId={avatarId} name={name} size={44} />
+              <span className="tv-ellipsis tv-name-lg">{name}</span>
+            </div>
+          );
+        })}
+      </div>
+    </article>
+  );
+}
+
 function ActiveState({
   event,
   americano,
@@ -380,20 +410,26 @@ function ActiveState({
 }) {
   const active = americano.rounds.find((round) => round.status === 'ACTIVE') ?? null;
   const upcoming = americano.rounds.find((round) => round.status === 'PENDING') ?? null;
-  const sitNames = active?.sitOuts.map((sit) => displayName(sit.userId, event, americano.standings)) ?? [];
+  const sitIds = active?.sitOuts.map((sit) => sit.userId) ?? [];
+  const sitNames = sitIds.map((userId) => displayName(userId, event, americano.standings));
+  const threeCourts = active?.matches.length === 3;
+  const nextSitNames = upcoming?.sitOuts.map((sit) => displayName(sit.userId, event, americano.standings)) ?? [];
   return (
     <div className="tv-body">
       <section className="tv-left">
         {active ? (
-          <div className={active.matches.length > 4 ? 'tv-courts many' : 'tv-courts'}>
+          <div className={active.matches.length > 4 ? 'tv-courts many' : threeCourts ? 'tv-courts quad' : 'tv-courts'}>
             {active.matches.map((match) => (
               <CourtCard key={match.id} match={match} event={event} americano={americano} />
             ))}
+            {threeCourts && (
+              <SitOutCard userIds={sitIds} event={event} standings={americano.standings} />
+            )}
           </div>
         ) : (
           <p className="tv-muted">The next round has not started yet.</p>
         )}
-        {sitNames.length > 0 && <p className="tv-sit">Sitting out: {sitNames.join(', ')}</p>}
+        {!threeCourts && sitNames.length > 0 && <p className="tv-sit">Sitting out: {sitNames.join(', ')}</p>}
         {upcoming && (
           <div className="tv-upnext">
             <div className="tv-upnext-main">
@@ -413,6 +449,9 @@ function ActiveState({
                   </div>
                 ))}
               </div>
+              {nextSitNames.length > 0 && (
+                <p className="tv-sit">Sitting out next: {nextSitNames.join(', ')}</p>
+              )}
             </div>
             <div className="tv-qr-copy">
               <QrTile value={liveViewerUrl(eventId)} tile={172} />

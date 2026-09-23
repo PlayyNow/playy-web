@@ -4,7 +4,6 @@ import { buildAmericanoPreview, computeAmericanoStandings, generateAmericanoSche
 export type SandboxState = 'setup' | 'live' | 'final';
 
 const HOST_ID = 'p01';
-const EXTRA_ID = 'p17';
 const BASE_PLAYERS = 16;
 const POINTS = 24;
 const BASE_NAMES = [
@@ -47,7 +46,7 @@ function playerId(index: number): string {
 
 export function parseCourtCount(raw: string | null): number {
   const n = Number(raw);
-  if (!Number.isInteger(n) || n < 1) return 4;
+  if (!Number.isInteger(n) || n < 1) return 3;
   return Math.min(4, n);
 }
 
@@ -58,7 +57,7 @@ export function parseSandboxState(raw: string | null): SandboxState {
 
 export function buildSandboxEvent(courtCount: number, state: SandboxState): PublicEventResponse {
   const courts = parseCourtCount(String(courtCount));
-  const preview = buildAmericanoPreview(BASE_PLAYERS, courts);
+  buildAmericanoPreview(BASE_PLAYERS, courts);
   const rosterIds = Array.from({ length: BASE_PLAYERS }, (_, index) => playerId(index));
   const schedule = generateAmericanoSchedule(rosterIds, courts);
   const activeRoundNumber = schedule.rounds.length >= 2 ? 2 : 1;
@@ -77,9 +76,6 @@ export function buildSandboxEvent(courtCount: number, state: SandboxState): Publ
     const longName = LONG_NAMES[index];
     if (longName) names.set(id, longName);
   });
-
-  const needsExtraSitOut = preview.sitOutPerRound === 0;
-  if (needsExtraSitOut) names.set(EXTRA_ID, 'Rami Darwish');
 
   const participants: PublicParticipant[] = [...names.entries()].map(([userId, name], index) => ({
     userId,
@@ -110,7 +106,6 @@ export function buildSandboxEvent(courtCount: number, state: SandboxState): Publ
             ? 'ACTIVE'
             : 'PENDING';
       const sitOuts = round.sitOutUserIds.map((userId) => ({ userId }));
-      if (needsExtraSitOut && isActiveSlot) sitOuts.push({ userId: EXTRA_ID });
 
       let confirmedOnActive = 0;
       const matches: PublicMatch[] = round.matches.map((match) => {
