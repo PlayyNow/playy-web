@@ -12,7 +12,8 @@ function Avatar({ avatarId, name }: { avatarId?: string | null; name: string }) 
   return <span className="avatar fallback">{initials(name)}</span>;
 }
 
-function scoreLabel(match: PublicMatch, hidden: boolean): string {
+function scoreLabel(match: PublicMatch, roundStatus: PublicRound['status'], hidden: boolean): string {
+  if (roundStatus === 'PENDING') return 'Upcoming';
   if (hidden) return 'Hidden';
   if (match.team1Score == null || match.team2Score == null) return 'In play';
   return `${match.team1Score} – ${match.team2Score}`;
@@ -22,10 +23,12 @@ function MatchCard({
   match,
   event,
   americano,
+  roundStatus,
 }: {
   match: PublicMatch;
   event: PublicEvent;
   americano: PublicAmericano;
+  roundStatus: PublicRound['status'];
 }) {
   const standings = americano.standings;
   const t1 = `${playerName(match.team1Player1Id, event, standings)} & ${playerName(match.team1Player2Id, event, standings)}`;
@@ -39,7 +42,7 @@ function MatchCard({
       <p className="team">{t1}</p>
       <p className="vs">vs</p>
       <p className="team">{t2}</p>
-      <p className="score">{scoreLabel(match, americano.scoresHidden)}</p>
+      <p className="score">{scoreLabel(match, roundStatus, americano.scoresHidden)}</p>
     </article>
   );
 }
@@ -56,7 +59,7 @@ function RoundBlock({ round, event, americano }: { round: PublicRound; event: Pu
       </header>
       <div className="match-grid">
         {round.matches.map((match) => (
-          <MatchCard key={match.id} match={match} event={event} americano={americano} />
+          <MatchCard key={match.id} match={match} event={event} americano={americano} roundStatus={round.status} />
         ))}
       </div>
       {sitNames.length > 0 && (
@@ -149,6 +152,16 @@ export default function EventPage() {
   }
 
   const joined = Math.max(0, Number(event.joinedCount || 0));
+  const orderedRest = americano ? americano.rounds.filter((round) => round.id !== liveRound?.id) : [];
+  const nextPending = orderedRest.find((round) => round.status === 'PENDING') ?? null;
+  const laterPending = orderedRest.filter((round) => round.status === 'PENDING' && round.id !== nextPending?.id);
+  const laterStart = laterPending[0]?.roundNumber;
+  const laterEnd = laterPending[laterPending.length - 1]?.roundNumber;
+  const laterDrawnLabel = laterStart == null || laterEnd == null
+    ? null
+    : laterStart === laterEnd
+      ? `Round ${laterStart} drawn`
+      : `Rounds ${laterStart}–${laterEnd} drawn`;
 
   return (
     <main className="shell">
@@ -192,11 +205,11 @@ export default function EventPage() {
           )}
           {americano && americano.status !== 'SETUP' && (
             <div className="rounds">
-              {americano.rounds
-                .filter((r) => r.id !== liveRound?.id)
-                .map((round) => (
-                  <RoundBlock key={round.id} round={round} event={event} americano={americano} />
-                ))}
+              {orderedRest.map((round) => {
+                if (round.status === 'PENDING' && round.id !== nextPending?.id) return null;
+                return <RoundBlock key={round.id} round={round} event={event} americano={americano} />;
+              })}
+              {laterDrawnLabel && <p className="muted">{laterDrawnLabel}</p>}
             </div>
           )}
         </section>
