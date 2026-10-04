@@ -1,5 +1,6 @@
 import type { PublicEventResponse, PublicMatch, PublicParticipant, PublicRound, PublicStanding } from '../types';
-import { buildAmericanoPreview, computeAmericanoStandings, generateAmericanoSchedule } from './americanoSchedule';
+import { computeAmericanoStandings } from './americanoSchedule';
+import { sandboxScenario } from './fixtures/americano';
 
 export type SandboxState = 'setup' | 'live' | 'final';
 
@@ -56,10 +57,9 @@ export function parseSandboxState(raw: string | null): SandboxState {
 }
 
 export function buildSandboxEvent(courtCount: number, state: SandboxState): PublicEventResponse {
-  const courts = parseCourtCount(String(courtCount));
-  buildAmericanoPreview(BASE_PLAYERS, courts);
+  const schedule = sandboxScenario(parseCourtCount(String(courtCount)));
+  const courts = schedule.courtCount;
   const rosterIds = Array.from({ length: BASE_PLAYERS }, (_, index) => playerId(index));
-  const schedule = generateAmericanoSchedule(rosterIds, courts);
   const activeRoundNumber = schedule.rounds.length >= 2 ? 2 : 1;
   const featuredRound = schedule.rounds.find((round) => round.roundNumber === activeRoundNumber) ?? schedule.rounds[0];
   const featuredIds = featuredRound

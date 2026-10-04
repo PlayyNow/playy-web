@@ -1,6 +1,7 @@
 import type { PublicEventResponse, PublicRound, PublicStanding } from '../types';
-import { computeAmericanoStandings, generateAmericanoSchedule } from './americanoSchedule';
+import { computeAmericanoStandings } from './americanoSchedule';
 import { buildSandboxEvent } from './buildSandbox';
+import { sandboxScenario } from './fixtures/americano';
 
 const SCORE_PAIRS: Array<[number, number]> = [
   [16, 8],
@@ -74,8 +75,7 @@ export function startTournament(data: PublicEventResponse): PublicEventResponse 
   const next = structuredClone(data);
   const board = next.americano;
   if (!board) return data;
-  const roster = next.event.participants.map((player) => player.userId);
-  const schedule = generateAmericanoSchedule(roster, board.courtCount);
+  const schedule = sandboxScenario(board.courtCount);
   const startedAt = new Date().toISOString();
   board.status = 'ACTIVE';
   board.totalRounds = schedule.totalRounds;
